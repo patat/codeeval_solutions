@@ -3,7 +3,7 @@
  * Script Name: Codeeval Prefix Expression Solution
  * Description: My solution to Prefix Expression challenge on codeeval.com
  * Author: Patat
- * Author: URI: https://github.com/patat
+ * Author URI: https://github.com/patat
  * Version: 1.0.0
  * License: GPL2
  */
