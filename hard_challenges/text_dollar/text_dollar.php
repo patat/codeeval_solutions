@@ -33,16 +33,22 @@ function file_reader($file_name) {
         echo $ex->getTraceAsString() . "\n";
     }
 
-}
+}// file_reader()
 
 file_reader($argv[1]);
 
+/**
+ * Solution wrapper
+ *
+ * @param string|int $sum
+ * @throws Exception
+ */
 function text_dollar($sum) {
     $sum = fix_input($sum);
     $tokens = parse_number($sum);
     $answer = compose_phrase($tokens);
     echo $answer . "\n";
-}
+}// text_dollar()
 
 /**
  * Performs type casting to int
@@ -52,7 +58,7 @@ function text_dollar($sum) {
  */
 function fix_input($input) {;
     return (int)$input;
-}
+}// fix_input()
 
 /**
  * Maps number representation from decimal to verbal
@@ -93,13 +99,13 @@ function map_0_to_19($num) {
         throw new Exception(utf8_encode("No name for $num defined."));
     }
 
-}
+}// map_1_to_19()
 
 /**
  * Maps round numbers to words
  *
  * @param int|string $num Round number from 20 to 90
- * @return string English verbal representation of the given number
+ * @return string English textual representation of the given number
  * @throws Exception No name defined
  */
 function map_20_to_90($num) {
@@ -121,13 +127,13 @@ function map_20_to_90($num) {
     } else {
         throw new Exception(utf8_encode("No name for $num defined."));
     }
-}
+}// map_20_to_90()
 
 /**
- * Splits positive integer on tokens, designed for verbal conversion
+ * Splits positive integer on tokens, designed for textual conversion
  *
  * @param $num Number to be split on tokens
- * @return array Tokens prepared to words substitution
+ * @return array Tokens prepared for word substitution
  */
 function parse_number($num) {
     $tokens = array();
@@ -165,10 +171,10 @@ function parse_number($num) {
 }// parse_number()
 
 /**
- * Composes english verbal representation of positive integer
+ * Composes english textual representation of positive integer
  *
  * @param int[] $tokens Given number split to parts
- * @return string Verbal representation of given number
+ * @return string Textual representation of given number
  * @throws Exception No tokens to process
  */
 function compose_phrase($tokens) {
@@ -186,9 +192,11 @@ function compose_phrase($tokens) {
     $round = 0;
 
     // OneDollar Case
+    /*
     if($last_index == 0 && $tokens[0] == 1) {
         return 'OneDollar';
     }
+    */
 
     while ($ptr <= $last_index) {
 
