@@ -50,3 +50,25 @@ assert('$arr[2] == 0');
 assert('$arr[3] == 1');
 $answer = compose_phrase($arr);
 assert('$answer == "OneHundredThousandOneHundredTenDollars"');
+
+// codeeval tests
+$answer = text_dollar(573);
+$correct = 'FiveHundredSeventyThreeDollars';
+assert('$answer == $correct');
+
+$answer = text_dollar(2607);
+$correct = 'TwoThousandSixHundredSevenDollars';
+assert('$answer == $correct');
+
+$answer = text_dollar(877);
+$correct = 'EightHundredSeventySevenDollars';
+assert('$answer == $correct');
+
+$answer = text_dollar(204);
+$correct = 'TwoHundredFourDollars';
+assert('$answer == $correct');
+
+$answer = text_dollar(253);
+$correct = 'TwoHundredFiftyThreeDollars';
+assert('$answer == $correct');
+
