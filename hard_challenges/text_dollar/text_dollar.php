@@ -17,13 +17,20 @@
 function file_reader($file_name) {
     try {
         $fh = fopen($file_name, 'r');
+        $new_line = false;
         while (!feof($fh)) {
             $test = fgets($fh);
             if ($test == null) {
                 break;
             }
+
+            if ($new_line) {
+                echo "\n";
+            }
+            $new_line = true;
             // solution goes here
-            text_dollar($test);
+            echo text_dollar($test);
+
         }
 
         fclose($fh);
@@ -41,13 +48,14 @@ file_reader($argv[1]);
  * Solution wrapper
  *
  * @param string|int $sum
+ * @return string English textual representation of positive integer
  * @throws Exception
  */
 function text_dollar($sum) {
     $sum = fix_input($sum);
     $tokens = parse_number($sum);
     $answer = compose_phrase($tokens);
-    echo $answer . "\n";
+    return $answer;
 }// text_dollar()
 
 /**
@@ -190,13 +198,6 @@ function compose_phrase($tokens) {
     $result = array();
     $ptr = 0;
     $round = 0;
-
-    // OneDollar Case
-    /*
-    if($last_index == 0 && $tokens[0] == 1) {
-        return 'OneDollar';
-    }
-    */
 
     while ($ptr <= $last_index) {
 
