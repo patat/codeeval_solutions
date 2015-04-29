@@ -195,16 +195,22 @@ function compose_phrase($tokens) {
         'Thousand',
         'Million'
     );
+
     $result = array();
     $ptr = 0;
     $round = 0;
+    $round_fulfilled = false;
 
     while ($ptr <= $last_index) {
+        if($round_fulfilled) {
+            array_push($result, $scale[$round]);
+        }
 
-        array_push($result, $scale[$round]);
+        $round_fulfilled = false;
         // Add 1 - 19
         if ($tokens[$ptr] > 0) {
             array_push($result, map_0_to_19($tokens[$ptr++]));
+            $round_fulfilled = true;
         } else {
             $ptr++;
         }
@@ -212,11 +218,13 @@ function compose_phrase($tokens) {
         // Add 20 - 90
         if ($ptr <= $last_index && $tokens[$ptr] > 9) {
             array_push($result, map_20_to_90($tokens[$ptr++]));
+            $round_fulfilled = true;
         }
 
         // Add hundreds
         if ($ptr <= $last_index && $tokens[$ptr] > 0) {
             array_push($result, map_0_to_19($tokens[$ptr++]) . 'Hundred');
+            $round_fulfilled = true;
         } else {
             $ptr++;
         }
