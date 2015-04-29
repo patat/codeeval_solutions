@@ -51,6 +51,16 @@ assert('$arr[3] == 1');
 $answer = compose_phrase($arr);
 assert('$answer == "OneHundredThousandOneHundredTenDollars"');
 
+$arr = parse_number(100000000);
+assert('$arr[0] == 0');
+assert('$arr[1] == 0');
+assert('$arr[2] == 0');
+assert('$arr[3] == 0');
+assert('$arr[4] == 0');
+assert('$arr[5] == 1');
+$answer = compose_phrase($arr);
+assert('$answer == "OneHundredMillionDollars"');
+
 // codeeval tests
 $answer = text_dollar(573);
 $correct = 'FiveHundredSeventyThreeDollars';
