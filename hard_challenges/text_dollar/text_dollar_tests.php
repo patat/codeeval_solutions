@@ -20,7 +20,7 @@ assert_options(ASSERT_CALLBACK, 'tt_assert_handler');
 $arr = parse_number(1);
 assert('$arr[0] == 1');
 $answer = compose_phrase($arr);
-assert('$answer == "OneDollar"');
+assert('$answer == "OneDollars"');
 
 $arr = parse_number(123);
 assert('$arr[0] == 3');
