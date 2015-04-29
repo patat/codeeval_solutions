@@ -199,12 +199,10 @@ function compose_phrase($tokens) {
     $result = array();
     $ptr = 0;
     $round = 0;
-    $round_fulfilled = false;
 
     while ($ptr <= $last_index) {
-        if($round_fulfilled) {
-            array_push($result, $scale[$round]);
-        }
+
+        array_push($result, $scale[$round]);
 
         $round_fulfilled = false;
         // Add 1 - 19
@@ -228,7 +226,10 @@ function compose_phrase($tokens) {
         } else {
             $ptr++;
         }
-
+        // Delete 10^3 name (round) if all tokens were 0
+        if ($round_fulfilled == false) {
+            array_pop($result);
+        }
         $round++;
     }
 
