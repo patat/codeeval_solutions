@@ -15,3 +15,16 @@ function tt_assert_handler($file, $line, $code, $desc = null) {
 }
 
 assert_options(ASSERT_CALLBACK, 'tt_assert_handler');
+
+//
+try {
+    $test = '###########        ##  o  o  ##    o o ## o   *o ## o o    ## * * *o ##        ##        ####/######';
+    $room = new Room($test, 10);
+    $new_test = $room->serialize();
+    assert($test == $new_test);
+    $room->print_room();
+} catch (Exception $ex) {
+    echo $ex->getMessage() . "\n";
+    echo "In " . $ex->getFile() . ", line: " . $ex->getLine() . "\n";
+    echo $ex->getTraceAsString() . "\n";
+}
