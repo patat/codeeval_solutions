@@ -57,7 +57,6 @@ function ray_of_light($room) {
 }// text_dollar()
 
 class Cell {
-    const LAST = 9;
     private $x;
     private $y;
     private $content;
@@ -71,49 +70,31 @@ class Cell {
     public function get_x() {
         return $this->x;
     }
-    private function set_x($x) {
-        if ((int)$x >= 0 && (int)$x <= self::LAST) {
-            $this->x = (int)$x;
-        } else {
-            throw new Exception("Incorrect cell index x = $x");
-        }
+    public function set_x($x) {
+        $this->x = (int)$x;
     }
     public function get_y() {
         return $this->y;
     }
     private function set_y($y) {
-        if ((int)$y >= 0 && (int)$y <= self::LAST) {
-            $this->y = (int)$y;
-        } else {
-            throw new Exception("Incorrect cell index y = $y");
-        }
+        $this->y = (int)$y;
     }
     public function  get_content() {
         return $this->content;
     }
-    public  function set_content($char) {
+    public function set_content($char) {
         $this->content = $char;
     }
 
-    public function is_left() {
-        return $this->x == 0;
-    }
-    public function is_top() {
-        return $this->y == 0;
-    }
-    public function is_right() {
-        return $this->x == self::LAST;
-    }
-    public function is_bottom() {
-        return $this->y == self::LAST;
-    }
 }// Cell
 
 class Room {
     private $home;
     private $source;
+    private $size;
 
     public function __construct($serialized_room, $size) {
+        $this->size = $size;
         $this->deserialize($serialized_room, $size);
     }
 
@@ -181,40 +162,160 @@ class Room {
         array_push($stack, $this->source);
         while (count($stack) > 0) {
             $ray = array_pop($stack);
+            if ($ray->get_content() == '/') {
+                // going up
+                $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() + 1);
 
+                if ($target != null) {
+                    switch ($target->get_content()) {
+                        case ' ':
+                            $target->set_content('/');
+                            array_push($stack, $target);
+                            $this->set_cell($target);
+                            break;
+                        case '#':
+                            $target1 = $this->get_cell($target->get_x()+1, $target->get_y());
+                            if ($target1 != null) {
+                                switch ($target1->get_content()) {
+                                    case ' ':
+                                        $target1->set_content('\\');
+                                        array_push($stack, $target1);
+                                        $this->set_cell($target1);
+                                        break;
+                                    case '#':
+                                        $target2 = $this->get_cell($target->get_x(), $target->get_y()-1);
+                                        if ($target2 != null) {
+                                            switch ($target2->get_content()) {
+                                                case ' ':
+                                                    $target2->set_content('\\');
+                                                    array_push($stack, $target2);
+                                                    $this->set_cell($target2);
+                                                    break;
+                                                default: break;
+                                            }
+                                        }
+                                        break;
+                                    case 'o': break;
+                                    default: break;
+                                }
+                            }
+                        case 'o':
+                            break;
+                        default: break;
+                    }
+                }
+
+                // going down
+                $target = $this->get_cell($ray->get_x() + 1, $ray->get_y() - 1);
+                if ($target != null) {
+                    switch ($target->get_content()) {
+                        case ' ':
+                            $target->set_content('/');
+                            array_push($stack, $target);
+                            $this->set_cell($target);
+                            break;
+                        case '#':
+                            $target1 = $this->get_cell($target->get_x() - 1, $target->get_y());
+                            if ($target1 != null) {
+                                switch ($target1->get_content()) {
+                                    case ' ':
+                                        $target1->set_content('\\');
+                                        array_push($stack, $target1);
+                                        $this->set_cell($target1);
+                                        break;
+                                    case '#':
+                                        $target2 = $this->get_cell($target->get_x(), $target->get_y() + 1);
+                                        if ($target2 != null) {
+                                            switch ($target2->get_content()) {
+                                                case ' ':
+                                                    $target2->set_content('\\');
+                                                    array_push($stack, $target2);
+                                                    $this->set_cell($target2);
+                                                    break;
+                                                default: break;
+                                            }
+                                        }
+                                        break;
+                                    case 'o': break;
+                                    default: break;
+                                }
+                            }
+                        case 'o':
+                            break;
+                        default: break;
+                    }
+                }
+
+            } else if ($ray->get_content() == '\\') {
+                $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() - 1);
+
+                if ($target != null) {
+                    switch ($target->get_content()) {
+                        case ' ':
+                            $target->set_content('\\');
+                            array_push($stack, $target);
+                            $this->set_cell($target);
+                            break;
+                        case '#':
+                            $target1 = $this->get_cell($target->get_x()+1, $target->get_y());
+                            if ($target1 != null) {
+                                switch ($target1->get_content()) {
+                                    case ' ':
+                                        $target1->set_content('/');
+                                        array_push($stack, $target1);
+                                        $this->set_cell($target1);
+                                        break;
+                                    case '#':
+                                        $target2 = $this->get_cell($target->get_x(), $target->get_y()+1);
+                                        if ($target2 != null) {
+                                            switch ($target2->get_content()) {
+                                                case ' ':
+                                                    $target2->set_content('/');
+                                                    array_push($stack, $target2);
+                                                    $this->set_cell($target2);
+                                                    break;
+                                                default: break;
+                                            }
+                                        }
+                                        break;
+                                    case 'o': break;
+                                    default: break;
+                                }
+                            }
+                        case 'o':
+                            break;
+                        default: break;
+                    }
+                }
+
+
+            } else if ($ray == 'X') {
+
+            } else {
+                //exc
+            }
+            // test
+            //$this->print_room();
         }
     }// distribute_light()
 
-    private function get_direction($cell) {
-        if (!(method_exists($cell, 'get_content')
-            && method_exists($cell, 'is_top')
-            && method_exists($cell, 'is_right')
-            && method_exists($cell, 'is_left')
-            && method_exists($cell, 'is_bottom')
-            && method_exists($cell, 'get_x')
-            && method_exists($cell, 'get_y'))) {
+    private function cell_exists($x, $y) {
+        $cond = $x >= 0 && $x < $this->size && $y >=0 && $y < $this->size;
+        return $cond;
+    }// cell_exists()
 
-            throw new Exception(utf8_encode("Argument is not of the Cell type."));
+    private function get_cell($x, $y) {
+        return ($this->cell_exists($x, $y)) ? $this->home[$x][$y] : null;
+    }// get_cell()
+    private function set_cell($cell) {
+        if ($this->cell_exists($cell->get_x(), $cell->get_y())) {
+            $this->home[$cell->get_x()][$cell->get_y()] = $cell;
+        } else {
+            throw new Exception(utf8_encode("Cell is out of borders."));
         }
+    }// set_cell()
 
-        if ($cell->get_content() ==  '/' )
-        {
-            if (!$cell->is_top() && !$cell->is_right()) {
-                $target = $this->home[$cell->get_x() + 1][$cell->get_y() + 1];
-                if (!method_exists($target, 'get_content')) {
-                    throw new Exception(utf8_encode("Target var is not of the Cell type."));
-                }
-                $t_content = $target->get_content();
-                if ($t_content != '/') {
-                    if ($t_content == '*') {
 
-                    } else {
-                        return 'upright';
-                    }
-                }
-            }
-        }
-    }// get_direction()
 }// Room
 
 
