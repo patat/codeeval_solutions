@@ -18,13 +18,17 @@ assert_options(ASSERT_CALLBACK, 'tt_assert_handler');
 
 //
 try {
-    $test = '###########        ##  o  o  ##    o o ## o    o ## o o    ##      o ##        ##        ####/######';
+
+    //$test = '###########\\ /\\/X\\ ## X /* \\\\##/*X/ \\ X##\\//\\* X/##/X *\\//\\##X \\ /**/##\\\\ X/** ## \\X/\\/ \\####X######';
+    $test = '###########        ##    *   ## *      ##    *   ##   *    ##     ** ##     ** ##        ####/######';
     $room = new Room($test, 10);
     $new_test = $room->serialize();
     assert($test == $new_test);
     $room->print_room();
     $room->distribute_light();
     $room->print_room();
+
+
 } catch (Exception $ex) {
     echo $ex->getMessage() . "\n";
     echo "In " . $ex->getFile() . ", line: " . $ex->getLine() . "\n";
