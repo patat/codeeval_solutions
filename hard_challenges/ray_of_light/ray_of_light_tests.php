@@ -18,16 +18,28 @@ assert_options(ASSERT_CALLBACK, 'tt_assert_handler');
 
 //
 try {
-
-    //$test = '###########\\ /\\/X\\ ## X /* \\\\##/*X/ \\ X##\\//\\* X/##/X *\\//\\##X \\ /**/##\\\\ X/** ## \\X/\\/ \\####X######';
+    // test 1
+    $answer = '###########\\ /\\/X\\ ## X /* \\\\##/*X/ \\ X##\\//\\* X/##/X *\\//\\##X \\ /**/##\\\\ X/** ## \\X/\\/ \\####X######';
     $test = '###########        ##    *   ## *      ##    *   ##   *    ##     ** ##     ** ##        ####/######';
     $room = new Room($test, 10);
     $new_test = $room->serialize();
     assert($test == $new_test);
     $room->print_room();
+    //$room->distribute_light();
+    $result = $room->serialize();
+    assert($result == $answer);
+
+    // test 2
+    $answer = '###########  /\\ /\\ ## /  * o\\##/ o/ \\ /#/  / o X ## o * / \\##/ \\ /  /##\\  X  / ## \\/ \\/  ###########';
+    $test = '###########        ##    * o ##  o     #/    o   ## o *    ##       *##        ##        ###########';
+    $room = new Room($test, 10);
+    $new_test = $room->serialize();
+    //assert($test == $new_test);
+    $room->print_room();
     $room->distribute_light();
     $room->print_room();
-
+    $result = $room->serialize();
+    //assert($result == $answer);
 
 } catch (Exception $ex) {
     echo $ex->getMessage() . "\n";

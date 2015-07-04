@@ -20,8 +20,8 @@ function file_reader($file_name) {
         $new_line = false;
         while (!feof($fh)) {
             $test = fgets($fh);
-            if ($test == null) {
-                break;
+            if ($test == null || trim($test) == null) {
+                continue;
             }
 
             if ($new_line) {
@@ -29,7 +29,7 @@ function file_reader($file_name) {
             }
             $new_line = true;
             // solution goes here
-
+            echo ray_of_light($test);
 
         }
 
@@ -47,14 +47,16 @@ file_reader($argv[1]);
 /**
  * Solution wrapper
  *
- * @param string $room
- * @return string English textual representation of positive integer
+ * @param string $line Serialized room 10x10 cells with no distributed light
+ * @return string Serialized room 10x10 cells with light distributed
  * @throws Exception
  */
-function ray_of_light($room) {
+function ray_of_light($line) {
+    $room = new Room($line, 10);
+    $room->distribute_light();
 
-    //return $answer;
-}// text_dollar()
+    return $room->serialize();
+}// ray_of_light()
 
 class Cell {
     private $x;
@@ -101,11 +103,13 @@ class Room {
     private $source;
     private $size;
     private $stack;
+    private $cnt;
 
     public function __construct($serialized_room, $size) {
         $this->size = $size;
         $this->deserialize($serialized_room, $size);
         $this->stack = array();
+        $this->cnt = 1;
     }
 
     /**
@@ -115,7 +119,7 @@ class Room {
      */
     private function deserialize($serialized_room, $size) {
 
-        $room_length = strlen($serialized_room);
+        $room_length = strlen(trim($serialized_room));
         if ($room_length / $size != $size) {
             throw new Exception(utf8_encode("Serialized data and row size don't match"));
         }
@@ -173,229 +177,49 @@ class Room {
         array_push($this->stack, $this->source);
         while (count($this->stack) > 0) {
             $ray = array_pop($this->stack);
-            if ($ray->get_content() == '/') {
-                // going up
-                $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() + 1);
 
-                if ($target != null) {
-                    switch ($target->get_content()) {
-                        case ' ':
-                            $target->set_content('/');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '\\':
-                            $target->set_content('X');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '#':
-                            $target1 = $this->get_cell($target->get_x()+1, $target->get_y());
-                            if ($target1 != null) {
-                                switch ($target1->get_content()) {
-                                    case ' ':
-                                        $target1->set_content('\\');
-                                        array_push($this->stack, $target1);
-                                        $this->set_cell($target1);
-                                        break;
-                                    case '#':
-                                        $target2 = $this->get_cell($target->get_x(), $target->get_y()-1);
-                                        if ($target2 != null) {
-                                            switch ($target2->get_content()) {
-                                                case ' ':
-                                                    $target2->set_content('\\');
-                                                    array_push($this->stack, $target2);
-                                                    $this->set_cell($target2);
-                                                    break;
-                                                default: break;
-                                            }
-                                        }
-                                        break;
-                                    case 'o': break;
-                                    default: break;
-                                }
-                            }
-                        case 'o':
-                            break;
-                        case '*':
-                            $this->prism_distribution($ray, $target);
-
-                            break;
-                        default: break;
-                    }
-                }
-
-                // going down
-                $target = $this->get_cell($ray->get_x() + 1, $ray->get_y() - 1);
-                if ($target != null) {
-                    switch ($target->get_content()) {
-                        case ' ':
-                            $target->set_content('/');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '\\':
-                            $target->set_content('X');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '#':
-                            $target1 = $this->get_cell($target->get_x() - 1, $target->get_y());
-                            if ($target1 != null) {
-                                switch ($target1->get_content()) {
-                                    case ' ':
-                                        $target1->set_content('\\');
-                                        array_push($this->stack, $target1);
-                                        $this->set_cell($target1);
-                                        break;
-                                    case '#':
-                                        $target2 = $this->get_cell($target->get_x(), $target->get_y() + 1);
-                                        if ($target2 != null) {
-                                            switch ($target2->get_content()) {
-                                                case ' ':
-                                                    $target2->set_content('\\');
-                                                    array_push($this->stack, $target2);
-                                                    $this->set_cell($target2);
-                                                    break;
-                                                default: break;
-                                            }
-                                        }
-                                        break;
-                                    case 'o': break;
-                                    default: break;
-                                }
-                            }
-                        case 'o':
-                            break;
-                        case '*':
-                            $this->prism_distribution($ray, $target);
-
-                            break;
-                        default: break;
-                    }
-                }
-
-            } else if ($ray->get_content() == '\\') {
-                // going up
-                $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() - 1);
-
-                if ($target != null) {
-                    switch ($target->get_content()) {
-                        case ' ':
-                            $target->set_content('\\');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '/':
-                            $target->set_content('X');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '#':
-                            $target1 = $this->get_cell($target->get_x()+1, $target->get_y());
-                            if ($target1 != null) {
-                                switch ($target1->get_content()) {
-                                    case ' ':
-                                        $target1->set_content('/');
-                                        array_push($this->stack, $target1);
-                                        $this->set_cell($target1);
-                                        break;
-                                    case '#':
-                                        $target2 = $this->get_cell($target->get_x(), $target->get_y()+1);
-                                        if ($target2 != null) {
-                                            switch ($target2->get_content()) {
-                                                case ' ':
-                                                    $target2->set_content('/');
-                                                    array_push($this->stack, $target2);
-                                                    $this->set_cell($target2);
-                                                    break;
-                                                default: break;
-                                            }
-                                        }
-                                        break;
-                                    case 'o': break;
-                                    default: break;
-                                }
-                            }
-                        case 'o':
-                            break;
-                        case '*':
-                            $this->prism_distribution($ray, $target);
-
-                            break;
-                        default: break;
-                    }
-                }
-
-                // going down
-                $target = $this->get_cell($ray->get_x() + 1, $ray->get_y() + 1);
-
-                if ($target != null) {
-                    switch ($target->get_content()) {
-                        case ' ':
-                            $target->set_content('\\');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '/':
-                            $target->set_content('X');
-                            array_push($this->stack, $target);
-                            $this->set_cell($target);
-                            break;
-                        case '#':
-                            $target1 = $this->get_cell($target->get_x()-1, $target->get_y());
-                            if ($target1 != null) {
-                                switch ($target1->get_content()) {
-                                    case ' ':
-                                        $target1->set_content('/');
-                                        array_push($this->stack, $target1);
-                                        $this->set_cell($target1);
-                                        break;
-                                    case '#':
-                                        $target2 = $this->get_cell($target->get_x(), $target->get_y() - 1);
-                                        if ($target2 != null) {
-                                            switch ($target2->get_content()) {
-                                                case ' ':
-                                                    $target2->set_content('/');
-                                                    array_push($this->stack, $target2);
-                                                    $this->set_cell($target2);
-                                                    break;
-                                                default: break;
-                                            }
-                                        }
-                                        break;
-                                    case 'o': break;
-                                    default: break;
-                                }
-                            }
-                        case 'o':
-                            break;
-                        case '*':
-                            $this->prism_distribution($ray, $target);
-                            break;
-                        default: break;
-                    }
-                }
-
-            } else if ($ray->get_content() == 'X') {
-                // choose target
-                $target = $this->get_cell($ray->get_x() + 1, $ray->get_y() + 1);
-                if ($target != null && $target->is_light() ) {
-                    $target = $this->get_cell($ray->get_x() + 1, $ray->get_y() - 1);
-                    if ($target != null && $target->is_light()) {
-                        $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() - 1);
-                        if($target != null && $target->is_light) {
-                            $target = $this->get_cell($ray->get_x() - 1, $ray->get_y() + 1);
-                        }
-                    }
-                }
-
-
-            } else {
-                //exc
+            if ($this->cnt >= 20) {
+                $this->cnt = 1;
+                break;
             }
+
+            switch ($ray->get_content()) {
+                case '/':
+                    $success1 = $this->explore_target($ray, -1, 1);
+                    $success2 = $this->explore_target($ray, 1, -1);
+                    if ($success1 || $success2) {
+                        $this->cnt++;
+                    } else {
+                        $this->cnt = 1;
+                    }
+                    break;
+                case '\\':
+                    $success1 = $this->explore_target($ray, 1, 1);
+                    $success2 = $this->explore_target($ray, -1, -1);
+                    if ($success1 || $success2) {
+                        $this->cnt++;
+                    } else {
+                        $this->cnt = 1;
+                    }
+                    break;
+                case 'X':
+                    $success1 = $this->explore_target($ray, -1, 1);
+                    $success2 = $this->explore_target($ray, 1, -1);
+                    $success3 = $this->explore_target($ray, 1, 1);
+                    $success4 = $this->explore_target($ray, -1, -1);
+                    if ($success1 || $success2 || $success3 || $success4) {
+                        $this->cnt++;
+                    } else {
+                        $this->cnt = 1;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             // test
-            //$this->print_room();
+            $this->print_room();
+            //echo $this->cnt . "\n";
         }
     }// distribute_light()
 
@@ -416,6 +240,7 @@ class Room {
     }// set_cell()
 
     private function prism_distribution($ray, $target) {
+        $this->cnt = 1;
         $target1 = $this->get_cell($target->get_x() - 1, $target->get_y() + 1);
         $target2 = $this->get_cell($target->get_x() + 1, $target->get_y() + 1);
         $target3 = $this->get_cell($target->get_x() + 1, $target->get_y() - 1);
@@ -452,9 +277,9 @@ class Room {
                     $this->prism_distribution($target, $target2);
                     break;
                 case '/':
-                    $target1->set_content('X');
-                    array_push($this->stack, $target1);
-                    $this->set_cell($target1);
+                    $target2->set_content('X');
+                    array_push($this->stack, $target2);
+                    $this->set_cell($target2);
                     break;
                 default:
                     break;
@@ -472,9 +297,9 @@ class Room {
                     $this->prism_distribution($target, $target3);
                     break;
                 case '\\':
-                    $target1->set_content('X');
-                    array_push($this->stack, $target1);
-                    $this->set_cell($target1);
+                    $target3->set_content('X');
+                    array_push($this->stack, $target3);
+                    $this->set_cell($target3);
                     break;
                 default:
                     break;
@@ -492,9 +317,9 @@ class Room {
                     $this->prism_distribution($target, $target4);
                     break;
                 case '/':
-                    $target1->set_content('X');
-                    array_push($this->stack, $target1);
-                    $this->set_cell($target1);
+                    $target4->set_content('X');
+                    array_push($this->stack, $target4);
+                    $this->set_cell($target4);
                     break;
                 default:
                     break;
@@ -510,14 +335,15 @@ class Room {
         return (-$num);
     }// revert_num()
 
-    function explore_target($ray, $dx, $dy) {
-        $target = $this->get_cell($ray->get_x() + $dx, $ray->get_y() + $dy);
+    function explore_target(Cell $ray, $dx, $dy) {
 
-        $reverted_ray = $this->revert_ray($ray->get_content);
+        $target = $this->get_cell($ray->get_x() + $dx, $ray->get_y() + $dy);
+        $direct_ray = ($dx == $dy) ? '\\' : '/';
+        $reverted_ray = $this->revert_ray($direct_ray);
         if ($target != null) {
             switch ($target->get_content()) {
                 case ' ':
-                    $this->advance_ray($target, $ray->get_content());
+                    $this->advance_ray($target, $direct_ray);
                     break;
                 case $reverted_ray:
                     $this->advance_ray($target, 'X');
@@ -529,6 +355,16 @@ class Room {
                             case ' ':
                                 $this->advance_ray($target1, $reverted_ray);
                                 break;
+                            case $direct_ray:
+                                $this->advance_ray($target1, 'X');
+                                break;
+
+                            case '*':
+                                $fake_ray = new Cell($target->get_x(), $target->get_y()+ $this->revert_num($dy) , $reverted_ray);
+                                $this->prism_distribution($fake_ray ,$target1);
+
+                                break;
+
                             case '#':
                                 $target2 = $this->get_cell($target->get_x(), $target->get_y() + $this->revert_num($dy));
                                 if ($target2 != null) {
@@ -536,22 +372,32 @@ class Room {
                                         case ' ':
                                             $this->advance_ray($target2, $reverted_ray);
                                             break;
-                                        default: break;
+                                        case $direct_ray:
+                                            $this->advance_ray($target2, 'X');
+                                            break;
+                                        // TODO prism_distribution case
+
+                                        case '*':
+                                            $fake_ray = new Cell($target->get_x(), $target->get_y() + $dy, $reverted_ray);
+                                            $this->prism_distribution($fake_ray ,$target2);
+                                            break;
+
+                                        default: return false;
+
                                     }
                                 }
                                 break;
-                            case 'o': break;
-                            default: break;
+                            default: return false;
                         }
                     }
-                case 'o':
                     break;
                 case '*':
                     $this->prism_distribution($ray, $target);
                     break;
-                default: break;
+                default:  return false;
             }
         }
+        return true;
     }
 
     private function advance_ray($target, $new_content) {
@@ -567,4 +413,4 @@ class Room {
  * Testing section
  */
 
-require('ray_of_light_tests.php');
+//require('ray_of_light_tests.php');
